@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Controllers\Category;
+namespace App\Http\Controllers\Transaction;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
-class ProductController extends Controller
+class TransactionController extends Controller
 {
     /**
      * Display a listing of the resource.
