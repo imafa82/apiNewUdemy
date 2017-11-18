@@ -70,7 +70,37 @@ class UserController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $user = User::findOrFail($id);
+
+        $rules = [
+            'email' => 'email|unique:users,email,'.$user->id,
+            'password' => 'min:6|confirmed',
+            'admin' => 'in:'.User::ADMIN_USER.','.User::NORMAL_USER,
+        ];
+        $this->validate($request, $rules);
+        if($request->has('name')){
+            $user->name = $request->name;
+        }
+        if($request->has('email') && $user->email != $request->email){
+            $user->verified = User::NOT_VERIFIED_USER;
+            $user->verification_token = User::generateVerificationToken();
+            $user->email = $request->email;
+        }
+        if($request->has('password')){
+            $user->password = bcrypt($request->password);
+        }
+        if($request->has('admin')){
+            if(!$user->isVerified()){
+                return response()->json(['error'=>"Solo l'utente verificato può cambiare questo parametro", 'code' => 409 ], 409);
+            } else{
+                $user->admin = $request->admin;
+            }
+        }
+        if(!$user->isDirty()){
+            return response()->json(['error' => 'Non è stato cambiato alcun parametro', 'code'=> 422], 422);
+        }
+        $user->save();
+        return response()->json(['data' => $user], 200);
     }
 
     /**
@@ -81,6 +111,8 @@ class UserController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $user = User::findOrFail($id);
+        $user->delete();
+        return response()->json(['data'=> $user], 200);
     }
 }
