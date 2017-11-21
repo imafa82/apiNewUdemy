@@ -8,6 +8,11 @@ use App\Http\Controllers\ApiController;
 
 class UserController extends ApiController
 {
+    public function __construct()
+    {
+        $this->middleware('client.credentials')->only(['store', 'show']);
+    }
+
     /**
      * Display a listing of the resource.
      *
